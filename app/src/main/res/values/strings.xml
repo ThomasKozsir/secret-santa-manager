@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">secret santa manager</string>
+    <string name="enter_secret_santa">Please enter data for a new secret santa!</string>
+    <string name="name">last name</string>
+    <string name="forename">first name</string>
+    <string name="email">email</string>
+    <string name="save">save</string>
+    <string name="cancel">cancel</string>
+    <string name="add">add</string>
+</resources>

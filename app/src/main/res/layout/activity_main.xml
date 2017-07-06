@@ -1,28 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/present">
+    android:background="@drawable/present_crop">
 
+
+    <ListView
+        android:id="@+id/ListViewSecretSantas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#ffffffff"
+        android:dividerHeight="1dp"/>
+
+    <!-- helper textview to add space for the add button -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:orientation="horizontal">
+
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="5"/>
-        <Button
-            android:id="@+id/addButton"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:text="@string/add"
-            android:onClick="clickAddButton"/>
+            android:layout_weight="5" />
     </LinearLayout>
 
-</LinearLayout>
+    <!--floating action button to add new santas-->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        app:layout_anchor="@id/ListViewSecretSantas"
+        app:layout_anchorGravity="bottom|right|end"
+        android:onClick="clickAddButton"
+        android:src="@drawable/ic_fab_add"
+    />
+
+
+
+</android.support.design.widget.CoordinatorLayout>

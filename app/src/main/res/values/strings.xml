@@ -7,4 +7,6 @@
     <string name="save">save</string>
     <string name="cancel">cancel</string>
     <string name="add">add</string>
+    <string name="fillFormMessage">please fill in your forename, name and email address</string>
+    <string name="santaAddedToast">a new santa has been added</string>
 </resources>

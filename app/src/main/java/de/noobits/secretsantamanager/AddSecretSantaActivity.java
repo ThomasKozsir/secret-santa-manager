@@ -1,12 +1,18 @@
 package de.noobits.secretsantamanager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+
+import static android.R.attr.data;
 
 
 /**
@@ -16,6 +22,8 @@ import android.widget.EditText;
 public class AddSecretSantaActivity extends AppCompatActivity{
     private Button cancelButton;
     private EditText EditText_LastName, EditText_FirstName, EditText_Email;
+    private SharedPreferences preferences;
+    public static final String PREFS_NAME = "My_Prefs";
 
 
 
@@ -25,6 +33,7 @@ public class AddSecretSantaActivity extends AppCompatActivity{
         setContentView(R.layout.add_secret_santa);
 
         cancelButton = (Button)findViewById(R.id.button_cancel);
+        preferences = getPreferences(MODE_PRIVATE);
     }
 
     /**
@@ -37,25 +46,37 @@ public class AddSecretSantaActivity extends AppCompatActivity{
     }
 
     /**
-     * Takes the data from the form and saves it to the listview.
-     * Also saves the data persistent in shared preferences.
+     * Takes the data from the form and creates a new Santa with it.
+     * Also saves the data persistent in shared preferences as object.
      * @param v
      */
     public void clickSaveButton(View v){
 
-        //create a new array with Santa data
-        String[] data = new String[]{
-                ((EditText) findViewById(R.id.edit_text_forename)).getText().toString(),
-                ((EditText) findViewById(R.id.edit_text_name)).getText().toString(),
-                ((EditText) findViewById(R.id.edit_text_email)).getText().toString()
-        };
+        String forename =  ((EditText) findViewById(R.id.edit_text_forename)).getText().toString();
+        String name = ((EditText) findViewById(R.id.edit_text_name)).getText().toString();
+        String email = ((EditText) findViewById(R.id.edit_text_email)).getText().toString();
 
-        //...and give it to the mainActivity to add it there to the list
-        Intent intent = new Intent(AddSecretSantaActivity.this, MainActivity.class);
-        intent.putExtra("santaData", data);
-        AddSecretSantaActivity.this.startActivity(intent);
+        if(forename.equals("") || name.equals("") || email.equals("")){
+            Toast.makeText(getApplicationContext(), R.string.fillFormMessage, Toast.LENGTH_LONG).show();
+        }else {
+            SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = myPrefs.edit();
 
-        //TODO: save data of items persistent in shared preferences
+            //create a Santa
+            Santa newSanta = new Santa(forename, name, email);
+
+            //convert newSanta with Gson into a JSON String
+            Gson gson = new Gson();
+            String santaJson = gson.toJson(newSanta);
+
+            editor.putString("newSanta", santaJson);
+            editor.commit();
+
+            //...and give it to the mainActivity to add it there to the list
+            Intent intent = new Intent(AddSecretSantaActivity.this, MainActivity.class);
+            AddSecretSantaActivity.this.startActivity(intent);
+
+        }
     }
 
 

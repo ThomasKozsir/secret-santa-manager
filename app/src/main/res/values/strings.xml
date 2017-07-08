@@ -9,4 +9,7 @@
     <string name="add">add</string>
     <string name="fillFormMessage">please fill in your forename, name and email address</string>
     <string name="santaAddedToast">a new santa has been added</string>
+    <string name="emailAssignmentSubject">secret santa assignment</string>
+    <string name="askDeleteList">do you want to delete the complete List?</string>
+    <string name="assignmentDoneToast">Congratulations, your secret santas have been assigned to another santa. Check your emails please!</string>
 </resources>

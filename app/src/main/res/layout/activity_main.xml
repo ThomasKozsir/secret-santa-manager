@@ -44,6 +44,17 @@
         android:src="@drawable/ic_fab_add"
     />
 
-
+    <!--floating action button to shuffle and send mails-->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_shuffle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        app:layout_anchor="@id/ListViewSecretSantas"
+        app:layout_anchorGravity="top|right"
+        android:onClick="startAssignment"
+        android:src="@drawable/ic_fab_shuffle"
+        />
 
 </android.support.design.widget.CoordinatorLayout>

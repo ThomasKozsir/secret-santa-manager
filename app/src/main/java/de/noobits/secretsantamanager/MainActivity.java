@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    private FloatingActionButton addButton;
+    private FloatingActionButton addButton, shuffleButton;
     private ArrayList<Santa> santaArrayList ;    //set of all santas who need a receiver (all members at the beginning)
     private ArrayList<Santa> receiverArrayList; //set of people who have no santa yet
     private int santaCounter;
@@ -48,6 +48,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
+        shuffleButton = (FloatingActionButton)findViewById(R.id.fab_shuffle);
+        //longclick on shuffle fab clears the santaList
+        shuffleButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                SharedPreferences.Editor editor = myPrefs.edit();
+                editor.remove("santaList");
+                editor.apply();
+                loadSavedSantas();
+                updateSantaListView();
+                return false;
+            }
+        });
         listView = (ListView) findViewById(R.id.ListViewSecretSantas);
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -72,52 +85,56 @@ public class MainActivity extends AppCompatActivity {
      */
     public void startAssignment(View v){
         Log.d("startAssignment", "method started");
-        receiverArrayList = new ArrayList<Santa>();
-        int santaIndex, receiverIndex;
-        Santa chosenSanta;
-        Santa chosenReceiver;
+        if(!(santaArrayList == null) && santaArrayList.size() > 2) {
+            receiverArrayList = new ArrayList<Santa>();
+            int santaIndex, receiverIndex;
+            Santa chosenSanta;
+            Santa chosenReceiver;
 
-        //fill the receiver list with all santas, because every santa is also a receiver
-        Log.d("startAssignment", "start creating receiver list...");
-        for(Santa temp : santaArrayList){
-            receiverArrayList.add(temp);
-        }
-        Log.d("startAssignment", "receiver list created successfully");
-
-
-        //get the amount of initial santas once, before we take em out one for one, to assign them.
-        santaCounter = santaArrayList.size();
-
-        Log.d("startAssignment", "start ");
-        for(int i = 0; i< santaCounter; i++){
-            //get random santa and receiver, check if they arent the same
-            do {
-                santaIndex = randomGen.nextInt(santaArrayList.size());
-                receiverIndex = randomGen.nextInt(receiverArrayList.size());
-                chosenSanta = santaArrayList.get(santaIndex);
-                chosenReceiver = receiverArrayList.get(receiverIndex);
-            }while(chosenReceiver.equals(chosenSanta));
-
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("mailto: " + santaArrayList.get(santaIndex).getEmail()));
-            intent.putExtra(Intent.EXTRA_SUBJECT, "your secret santa gift receiver");
-
-            //remove santa from santaList and receiver from receiverList
-            santaArrayList.remove(santaIndex);
-            receiverArrayList.remove(receiverIndex);
-
-            //send email with the name of the chosen receiver to santa
-            intent.putExtra(Intent.EXTRA_TEXT, chosenReceiver.getFirstName() + ", " + chosenReceiver.getLastName());
-            if (intent != null) {
-                startActivity(intent);//null pointer check in case package name was not found
+            //fill the receiver list with all santas, because every santa is also a receiver
+            Log.d("startAssignment", "start creating receiver list...");
+            for (Santa temp : santaArrayList) {
+                receiverArrayList.add(temp);
             }
+            Log.d("startAssignment", "receiver list created successfully");
 
 
+            //get the amount of initial santas once, before we take em out one for one, to assign them.
+            santaCounter = santaArrayList.size();
+
+            Log.d("startAssignment", "start ");
+            for (int i = 0; i < santaCounter; i++) {
+                //get random santa and receiver, check if they arent the same
+                do {
+                    santaIndex = randomGen.nextInt(santaArrayList.size());
+                    receiverIndex = randomGen.nextInt(receiverArrayList.size());
+                    chosenSanta = santaArrayList.get(santaIndex);
+                    chosenReceiver = receiverArrayList.get(receiverIndex);
+                } while (chosenReceiver.equals(chosenSanta));
+
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto: " + santaArrayList.get(santaIndex).getEmail()));
+                intent.putExtra(Intent.EXTRA_SUBJECT, "your secret santa gift receiver");
+
+                //remove santa from santaList and receiver from receiverList
+                santaArrayList.remove(santaIndex);
+                receiverArrayList.remove(receiverIndex);
+
+                //send email with the name of the chosen receiver to santa
+                intent.putExtra(Intent.EXTRA_TEXT, chosenReceiver.getFirstName() + ", " + chosenReceiver.getLastName());
+                if (intent != null) {
+                    startActivity(intent);//null pointer check in case package name was not found
+                }
+
+
+            }
+            Log.d("startAssignment", "assignment done successfully");
+
+
+            Toast.makeText(getApplicationContext(), R.string.assignmentDoneToast, Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(this, R.string.cant_assign_message, Toast.LENGTH_LONG).show();
         }
-        Log.d("startAssignment", "assignment done successfully");
-
-
-        Toast.makeText(getApplicationContext(), R.string.assignmentDoneToast, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -145,6 +162,10 @@ public class MainActivity extends AppCompatActivity {
             //TODO: fill listView with items containing santa attributes forename and name
 
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, listViewContent);
+            listView.setAdapter(adapter);
+        }else{
+            String[] empty = new String[0];
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, empty);
             listView.setAdapter(adapter);
         }
     }

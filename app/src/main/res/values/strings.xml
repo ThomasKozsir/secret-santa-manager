@@ -17,4 +17,5 @@
     <string name="negative">no</string>
     <string name="permissionText">Error - please make sure this app has the needed permissions</string>
     <string name="emailErrorHint">invalid email address</string>
+    <string name="cant_assign_message">you need at least 3 people to do this</string>
 </resources>

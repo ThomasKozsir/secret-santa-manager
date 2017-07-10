@@ -125,6 +125,9 @@ public class AddSecretSantaActivity extends AppCompatActivity{
         ((TextView)findViewById(R.id.edit_text_email)).setText("");
     }
 
+    /**
+     * Initializes TextChangedListeners.
+     */
     public void createListeners(){
         final EditText editText_email = (EditText)findViewById(R.id.edit_text_email);
         editText_email.addTextChangedListener(new TextWatcher() {

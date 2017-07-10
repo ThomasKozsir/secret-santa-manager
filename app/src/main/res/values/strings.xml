@@ -7,7 +7,7 @@
     <string name="save">save</string>
     <string name="cancel">cancel</string>
     <string name="add">add</string>
-    <string name="fillFormMessage">please fill in your forename, name and email address</string>
+    <string name="fillFormMessage">please fill in your forename, name and correct email address</string>
     <string name="santaAddedToast">a new santa has been added</string>
     <string name="emailAssignmentSubject">your secret santa assignment</string>
     <string name="askDeleteList">do you want to delete the complete List?</string>

@@ -29,12 +29,14 @@ public class AddSecretSantaActivity extends AppCompatActivity{
     private SharedPreferences preferences;
     public static final String PREFS_NAME = "My_Prefs";
     private ArrayList<Santa>  santaArrayList;
+    private boolean formValid;
+    private int debugCounter = 1; //TODO: delete after alpha
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_secret_santa);
-
+        formValid = false;
         preferences = getPreferences(MODE_PRIVATE);
 
         createListeners();
@@ -60,7 +62,7 @@ public class AddSecretSantaActivity extends AppCompatActivity{
         String name = ((EditText) findViewById(R.id.edit_text_name)).getText().toString();
         String email = ((EditText) findViewById(R.id.edit_text_email)).getText().toString();
 
-        if(forename.equals("") || name.equals("") || email.equals("")){
+        if(forename.equals("") || name.equals("") || email.equals("") || !formValid){
             Toast.makeText(getApplicationContext(), R.string.fillFormMessage, Toast.LENGTH_LONG).show();
         }else {
             SharedPreferences myPrefs = getSharedPreferences(PREFS_NAME, 0);
@@ -146,14 +148,25 @@ public class AddSecretSantaActivity extends AppCompatActivity{
                 //check if the email adress contains an ampersand
                 if(!Pattern.matches(".+@.+", editText_email.getText())){
                     findViewById(R.id.text_view_email_error_hint).setVisibility(View.VISIBLE);
+                    formValid = false;
                 }else if(editText_email.getText().equals("")){
-                    findViewById(R.id.text_view_email_error_hint).setVisibility(View.INVISIBLE);
+                    findViewById(R.id.text_view_email_error_hint).setVisibility(View.VISIBLE);
+                    formValid = false;
                 }else{
                     findViewById(R.id.text_view_email_error_hint).setVisibility(View.INVISIBLE);
+                    formValid = true;
                 }
             }
         });
     }
 
+    /**
+     * Debugging button to fill in the form correct quickly. //TODO: delete method after alpha
+     */
+    public void quickFill(View v){
+        ((EditText)findViewById(R.id.edit_text_forename)).setText("Max");
+        ((EditText)findViewById(R.id.edit_text_name)).setText("Mustermann");
+        ((EditText)findViewById(R.id.edit_text_email)).setText("Alabastia@pokeliga.com");
+    }
 
 }

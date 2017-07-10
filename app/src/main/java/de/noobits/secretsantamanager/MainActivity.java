@@ -20,7 +20,7 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private FloatingActionButton addButton;
-    private ArrayList<Santa> santaArrayList;    //set of all santas who need a receiver (all members at the beginning)
+    private ArrayList<Santa> santaArrayList ;    //set of all santas who need a receiver (all members at the beginning)
     private ArrayList<Santa> receiverArrayList; //set of people who have no santa yet
     private int santaCounter;
     private ArrayAdapter<String> adapter;
@@ -47,9 +47,6 @@ public class MainActivity extends AppCompatActivity {
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
         listView = (ListView) findViewById(R.id.ListViewSecretSantas);
         santaArrayList = new ArrayList<Santa>();
-        loadSavedSantas();
-        //updateSantaListView();
-
     }
 
     @Override
@@ -110,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("startAssignment", "assignment done successfully");
 
 
-        Toast.makeText(getApplicationContext(), R.string.assignmentDoneToast, Toast.LENGTH_LONG);
+        Toast.makeText(getApplicationContext(), R.string.assignmentDoneToast, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -155,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         //get the newSanta from sharedpreferences
         String santaJson = myPrefs.getString("newSanta", "");  //getString(String key, String default)
         newSanta = gson.fromJson(santaJson, Santa.class);          //fromJson(String json, Object.class)
-
+        Log.d("putSantaToList", newSanta.toString());
 
         if(newSanta != null){
             //add the new santa to the list

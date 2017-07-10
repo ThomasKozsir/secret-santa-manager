@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -68,6 +69,7 @@ public class AddSecretSantaActivity extends AppCompatActivity{
             //convert newSanta with Gson into a JSON String
             Gson gson = new Gson();
             String santaJson = gson.toJson(newSanta);
+            Log.d("clickSaveButton", santaJson);
 
             editor.putString("newSanta", santaJson);
             editor.commit();

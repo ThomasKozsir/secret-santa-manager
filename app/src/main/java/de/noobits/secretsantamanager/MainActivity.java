@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.ListViewSecretSantas);
         santaArrayList = new ArrayList<Santa>();
         loadSavedSantas();
-        updateSantaListView();
+        //updateSantaListView();
 
     }
 
@@ -57,13 +57,13 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         putSantaToList();
         loadSavedSantas();
-        updateSantaListView();
+        //updateSantaListView();
     }
 
     /**
      * Chooses a random Santa out of the set and assign him to another member.
      */
-    private void startAssignment(){
+    public void startAssignment(){
         receiverArrayList = new ArrayList<Santa>();
         int santaIndex, receiverIndex;
         Santa chosenSanta;
@@ -82,10 +82,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_SENDTO);
             intent.setData(Uri.parse("mailto:"));
             intent.putExtra(Intent.EXTRA_SUBJECT, R.string.emailAssignmentSubject);
-
-
-            //TODO: get random santa, choose random receiver, check if its the santa himself, do choose again if so, else sent email to santa with name
-            //of the receiver
 
             //get random santa and receiver, check if they arent the same
             do {

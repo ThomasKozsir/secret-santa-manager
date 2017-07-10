@@ -12,6 +12,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.R.attr.data;
 
@@ -25,6 +29,7 @@ public class AddSecretSantaActivity extends AppCompatActivity{
     private EditText EditText_LastName, EditText_FirstName, EditText_Email;
     private SharedPreferences preferences;
     public static final String PREFS_NAME = "My_Prefs";
+    private ArrayList<Santa>  santaArrayList;
 
 
 
@@ -42,8 +47,7 @@ public class AddSecretSantaActivity extends AppCompatActivity{
      * @param v
      */
     public void clickCancelButton(View v){
-        Intent intent = new Intent(AddSecretSantaActivity.this, MainActivity.class);
-        AddSecretSantaActivity.this.startActivity(intent);
+        finish();
     }
 
     /**
@@ -74,14 +78,22 @@ public class AddSecretSantaActivity extends AppCompatActivity{
             editor.putString("newSanta", santaJson);
             editor.commit();
 
-            //...and give it to the mainActivity to add it there to the list
-            Intent intent = new Intent(AddSecretSantaActivity.this, MainActivity.class);
-            AddSecretSantaActivity.this.startActivity(intent);
-
+            //close this activity
+            finish();
         }
     }
 
+    /**
+     * Loads the saved list from sharedpreferences.
+     */
+    private void loadSavedSantas(){
+        Gson gson = new Gson();
 
+        //TODO: open sharedpreferences and get the list from there to save it in this class's list
+        String santaListJson = preferences.getString("santaList", "");
+        santaArrayList = gson.fromJson(santaListJson, new TypeToken<List<Santa>>(){}.getType());
+
+    }
 
 
 }

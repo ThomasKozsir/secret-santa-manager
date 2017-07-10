@@ -8,14 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,9 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private ListView listView;
     private String[] listViewContent;
-    private Santa newSanta;
     private SharedPreferences myPrefs;
-    private SharedPreferences.Editor editor;
     private Gson gson;
     private Random randomGen;
 
@@ -41,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         santaCounter = 0;
         gson = new Gson();
         myPrefs = getSharedPreferences(AddSecretSantaActivity.PREFS_NAME, 0);
-        editor = myPrefs.edit();
 
 
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
@@ -52,9 +50,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        putSantaToList();
         loadSavedSantas();
-        //updateSantaListView();
+        updateSantaListView();
     }
 
     /**
@@ -116,7 +113,8 @@ public class MainActivity extends AppCompatActivity {
     private void loadSavedSantas(){
         //TODO: open sharedpreferences and get the list from there to save it in this class's list
         String santaListJson = myPrefs.getString("santaList", "");
-        santaArrayList = gson.fromJson(santaListJson, ArrayList.class);
+        santaArrayList = gson.fromJson(santaListJson, new TypeToken<List<Santa>>(){}.getType());
+        Log.d("loadSavedSantas", santaArrayList.toString());
     }
 
     /**
@@ -129,12 +127,12 @@ public class MainActivity extends AppCompatActivity {
 
         for(int i = 0; i < santaCounter; i++){
             Log.d("updateSantaListView", "loop nr.:" + i);
-            listViewContent[i] = (String)(santaArrayList.get(i+1).getFirstName() + " " + santaArrayList.get(i+1).getLastName());
+            listViewContent[i] = santaArrayList.get(i).getFirstName() + " " + santaArrayList.get(i).getLastName();
         }
         //TODO: fill listView with items containing santa attributes forename and name
 
-        //adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, listViewContent );
-        //listView.setAdapter(adapter);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, listViewContent );
+        listView.setAdapter(adapter);
     }
 
 
@@ -144,33 +142,5 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Adds a new Santa to the list if it exists. Resets the newSanta after that.
-     */
-    private void putSantaToList(){
 
-        //get the newSanta from sharedpreferences
-        String santaJson = myPrefs.getString("newSanta", "");  //getString(String key, String default)
-        newSanta = gson.fromJson(santaJson, Santa.class);          //fromJson(String json, Object.class)
-        Log.d("putSantaToList", newSanta.toString());
-
-        if(newSanta != null){
-            //add the new santa to the list
-            santaArrayList.add(newSanta);
-
-            //convert the Santalist to a JSON string
-            String santaListJson = gson.toJson(santaArrayList);
-
-            //save santalist in sharedpreferences
-            editor.putString("santaList", santaListJson);
-            editor.commit();
-
-            //feedback for user, santa has been added
-            Toast.makeText(getApplicationContext(), newSanta.getFirstName() + " has been added", Toast.LENGTH_LONG).show();
-        }
-        //TODO: Bugfixing - when starting the app, last added Santa is shown in toast
-        newSanta = null;
-        myPrefs.edit().remove("newSanta");
-        editor.commit();
-    }
 }

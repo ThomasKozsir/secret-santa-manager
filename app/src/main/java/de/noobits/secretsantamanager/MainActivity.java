@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        randomGen = new Random();
         santaCounter = 0;
         gson = new Gson();
         myPrefs = getSharedPreferences(AddSecretSantaActivity.PREFS_NAME, 0);
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
         listView = (ListView) findViewById(R.id.ListViewSecretSantas);
+
         santaArrayList = new ArrayList<Santa>();
     }
 
@@ -77,17 +79,17 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("startAssignment", "start ");
         for(int i = 0; i< santaCounter; i++){
-            santaIndex = randomGen.nextInt(santaArrayList.size());
-            receiverIndex = randomGen.nextInt(receiverArrayList.size());
-            Intent intent = new Intent(Intent.ACTION_SENDTO);
-            intent.setData(Uri.parse("mailto:"));
-            intent.putExtra(Intent.EXTRA_SUBJECT, R.string.emailAssignmentSubject);
-
             //get random santa and receiver, check if they arent the same
             do {
+                santaIndex = randomGen.nextInt(santaArrayList.size());
+                receiverIndex = randomGen.nextInt(receiverArrayList.size());
                 chosenSanta = santaArrayList.get(santaIndex);
                 chosenReceiver = receiverArrayList.get(receiverIndex);
             }while(chosenReceiver.equals(chosenSanta));
+
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setData(Uri.parse("mailto: " + santaArrayList.get(santaIndex).getEmail()));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "your secret santa gift receiver");
 
             //remove santa from santaList and receiver from receiverList
             santaArrayList.remove(santaIndex);
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);//null pointer check in case package name was not found
             }
 
-            santaCounter--;
+
         }
         Log.d("startAssignment", "assignment done successfully");
 
@@ -114,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
         //TODO: open sharedpreferences and get the list from there to save it in this class's list
         String santaListJson = myPrefs.getString("santaList", "");
         santaArrayList = gson.fromJson(santaListJson, new TypeToken<List<Santa>>(){}.getType());
-        Log.d("loadSavedSantas", santaArrayList.toString());
     }
 
     /**
@@ -122,17 +123,19 @@ public class MainActivity extends AppCompatActivity {
      */
     private void updateSantaListView(){
         //concatenate name and forename of each santa and save it in a array called listViewContent
-        int santaCounter = santaArrayList.size();
-        listViewContent = new String[santaCounter];
+        if(santaArrayList != null) {
+            int santaCounter = santaArrayList.size();
+            listViewContent = new String[santaCounter];
 
-        for(int i = 0; i < santaCounter; i++){
-            Log.d("updateSantaListView", "loop nr.:" + i);
-            listViewContent[i] = santaArrayList.get(i).getFirstName() + " " + santaArrayList.get(i).getLastName();
+            for (int i = 0; i < santaCounter; i++) {
+                Log.d("updateSantaListView", "loop nr.:" + i);
+                listViewContent[i] = santaArrayList.get(i).getFirstName() + " " + santaArrayList.get(i).getLastName();
+            }
+            //TODO: fill listView with items containing santa attributes forename and name
+
+            adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, listViewContent);
+            listView.setAdapter(adapter);
         }
-        //TODO: fill listView with items containing santa attributes forename and name
-
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, listViewContent );
-        listView.setAdapter(adapter);
     }
 
 

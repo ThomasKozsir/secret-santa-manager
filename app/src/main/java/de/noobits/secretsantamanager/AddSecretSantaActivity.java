@@ -3,15 +3,22 @@ package de.noobits.secretsantamanager;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 /**
@@ -29,19 +36,22 @@ public class AddSecretSantaActivity extends AppCompatActivity{
         setContentView(R.layout.add_secret_santa);
 
         preferences = getPreferences(MODE_PRIVATE);
+
+        createListeners();
     }
 
     /**
-     * Go back to main activity. Redundant to the hardware back button.
+     * Empty the form and go back to main activity.
      * @param v
      */
     public void clickCancelButton(View v){
+
         finish();
     }
 
     /**
-     * Takes the data from the form and creates a new Santa with it.
-     * Also saves the data persistent in shared preferences as object.
+     * Creates a new Santa by input data.
+     * Also saves the data persistent in shared preferences as a santa-object.
      * @param v
      */
     public void clickSaveButton(View v){
@@ -89,6 +99,57 @@ public class AddSecretSantaActivity extends AppCompatActivity{
         String santaListJson = preferences.getString("santaList", "");
         santaArrayList = gson.fromJson(santaListJson, new TypeToken<List<Santa>>(){}.getType());
 
+    }
+
+    /**
+     * Resets the EditTextcontaining the first name.
+     * @param v
+     */
+    public void clickResetFirstName(View v){
+        ((TextView)findViewById(R.id.edit_text_forename)).setText("");
+    }
+
+    /**
+     * Resets the EditText containing the last name.
+     * @param v
+     */
+    public void clickResetName(View v){
+        ((TextView)findViewById(R.id.edit_text_name)).setText("");
+    }
+
+    /**
+     * Resets the EditText containing the email.
+     * @param v
+     */
+    public void clickResetEmail(View v){
+        ((TextView)findViewById(R.id.edit_text_email)).setText("");
+    }
+
+    public void createListeners(){
+        final EditText editText_email = (EditText)findViewById(R.id.edit_text_email);
+        editText_email.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //check if the email adress contains an ampersand
+                if(!Pattern.matches(".+@.+", editText_email.getText())){
+                    findViewById(R.id.text_view_email_error_hint).setVisibility(View.VISIBLE);
+                }else if(editText_email.getText().equals("")){
+                    findViewById(R.id.text_view_email_error_hint).setVisibility(View.INVISIBLE);
+                }else{
+                    findViewById(R.id.text_view_email_error_hint).setVisibility(View.INVISIBLE);
+                }
+            }
+        });
     }
 
 

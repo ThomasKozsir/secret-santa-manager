@@ -7,7 +7,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -45,6 +49,13 @@ public class MainActivity extends AppCompatActivity {
 
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
         listView = (ListView) findViewById(R.id.ListViewSecretSantas);
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO: create and open a contextmenu to edit/delete items
+                return false;
+            }
+        });
 
         santaArrayList = new ArrayList<Santa>();
     }

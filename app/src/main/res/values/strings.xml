@@ -16,4 +16,5 @@
     <string name="positive">yes</string>
     <string name="negative">no</string>
     <string name="permissionText">Error - please make sure this app has the needed permissions</string>
+    <string name="emailErrorHint">invalid email address</string>
 </resources>

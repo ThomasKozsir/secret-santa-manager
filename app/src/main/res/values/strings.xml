@@ -9,10 +9,11 @@
     <string name="add">add</string>
     <string name="fillFormMessage">please fill in your forename, name and email address</string>
     <string name="santaAddedToast">a new santa has been added</string>
-    <string name="emailAssignmentSubject">secret santa assignment</string>
+    <string name="emailAssignmentSubject">your secret santa assignment</string>
     <string name="askDeleteList">do you want to delete the complete List?</string>
     <string name="assignmentDoneToast">Congratulations, your secret santas have been assigned to another santa. Check your emails please!</string>
     <string name="readyToShuffleDialog">Are you sure your done and want to shuffle?</string>
     <string name="positive">yes</string>
     <string name="negative">no</string>
+    <string name="permissionText">Error - please make sure this app has the needed permissions</string>
 </resources>

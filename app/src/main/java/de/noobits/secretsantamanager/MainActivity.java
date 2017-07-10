@@ -63,19 +63,25 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Chooses a random Santa out of the set and assign him to another member.
      */
-    public void startAssignment(){
+    public void startAssignment(View v){
+        Log.d("startAssignment", "method started");
         receiverArrayList = new ArrayList<Santa>();
         int santaIndex, receiverIndex;
         Santa chosenSanta;
         Santa chosenReceiver;
 
         //fill the receiver list with all santas, because every santa is also a receiver
+        Log.d("startAssignment", "start creating receiver list...");
         for(Santa temp : santaArrayList){
             receiverArrayList.add(temp);
         }
+        Log.d("startAssignment", "receiver list created successfully");
+
+
         //get the amount of initial santas once, before we take em out one for one, to assign them.
         santaCounter = santaArrayList.size();
 
+        Log.d("startAssignment", "start ");
         for(int i = 0; i< santaCounter; i++){
             santaIndex = randomGen.nextInt(santaArrayList.size());
             receiverIndex = randomGen.nextInt(receiverArrayList.size());
@@ -95,13 +101,14 @@ public class MainActivity extends AppCompatActivity {
 
             //send email with the name of the chosen receiver to santa
             intent.putExtra(Intent.EXTRA_TEXT, chosenReceiver.getFirstName() + ", " + chosenReceiver.getLastName());
-
-            //catch app-crash, when theres no app to open the intent
-            if(intent.resolveActivity(getPackageManager()) != null){
-                startActivity(intent);
+            if (intent != null) {
+                startActivity(intent);//null pointer check in case package name was not found
             }
+
             santaCounter--;
         }
+        Log.d("startAssignment", "assignment done successfully");
+
 
         Toast.makeText(getApplicationContext(), R.string.assignmentDoneToast, Toast.LENGTH_LONG);
     }

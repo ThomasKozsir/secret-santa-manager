@@ -3,13 +3,11 @@ package de.noobits.secretsantamanager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -34,6 +33,12 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences myPrefs;
     private Gson gson;
     private Random randomGen;
+    int santaIndex;
+    int receiverIndex;
+    Santa chosenSanta;
+    Santa chosenReceiver;
+    //santas are keys while receivers are values
+    HashMap<String, String> pairList;
 
 
     @Override
@@ -43,33 +48,20 @@ public class MainActivity extends AppCompatActivity {
 
         randomGen = new Random();
         santaCounter = 0;
+        santaIndex = 0;
+        receiverIndex = 0;
+        chosenSanta = null;
+        chosenReceiver = null;
+        pairList = new HashMap<>();
         gson = new Gson();
         myPrefs = getSharedPreferences(AddSecretSantaActivity.PREFS_NAME, 0);
 
 
         addButton = (FloatingActionButton) findViewById(R.id.fab_add);
         shuffleButton = (FloatingActionButton)findViewById(R.id.fab_shuffle);
-        //longclick on shuffle fab clears the santaList
-        shuffleButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                SharedPreferences.Editor editor = myPrefs.edit();
-                editor.remove("santaList");
-                editor.apply();
-                loadSavedSantas();
-                updateSantaListView();
-                return false;
-            }
-        });
         listView = (ListView) findViewById(R.id.ListViewSecretSantas);
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                //TODO: create and open a contextmenu to edit/delete items
-                return false;
-            }
-        });
-
+        //longclick on shuffle fab clears the santaList
+        addOnClickListeners();
         santaArrayList = new ArrayList<Santa>();
     }
 
@@ -84,52 +76,32 @@ public class MainActivity extends AppCompatActivity {
      * Chooses a random Santa out of the set and assign him to another member.
      */
     public void startAssignment(View v){
-        Log.d("startAssignment", "method started");
+        loadSavedSantas();
+        //only do anything if there are at least 3 people in the list
         if(!(santaArrayList == null) && santaArrayList.size() > 2) {
-            receiverArrayList = new ArrayList<Santa>();
-            int santaIndex, receiverIndex;
-            Santa chosenSanta;
-            Santa chosenReceiver;
 
-            //fill the receiver list with all santas, because every santa is also a receiver
-            Log.d("startAssignment", "start creating receiver list...");
-            for (Santa temp : santaArrayList) {
-                receiverArrayList.add(temp);
-            }
-            Log.d("startAssignment", "receiver list created successfully");
-
+            createReceiverList();
 
             //get the amount of initial santas once, before we take em out one for one, to assign them.
             santaCounter = santaArrayList.size();
 
-            Log.d("startAssignment", "start ");
             for (int i = 0; i < santaCounter; i++) {
-                //get random santa and receiver, check if they arent the same
-                do {
-                    santaIndex = randomGen.nextInt(santaArrayList.size());
-                    receiverIndex = randomGen.nextInt(receiverArrayList.size());
-                    chosenSanta = santaArrayList.get(santaIndex);
-                    chosenReceiver = receiverArrayList.get(receiverIndex);
-                } while (chosenReceiver.equals(chosenSanta));
+                defineRandomPairs();
 
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("mailto: " + santaArrayList.get(santaIndex).getEmail()));
-                intent.putExtra(Intent.EXTRA_SUBJECT, "your secret santa gift receiver");
+                while(checkIfPairIsInvalid()){
+                    Log.d("loop", "in check loop");
+                    pairList.remove(chosenSanta.getEmail());
+                    defineRandomPairs();
+                }
+
+                EmailController.sendEmails(chosenSanta, chosenReceiver);
 
                 //remove santa from santaList and receiver from receiverList
                 santaArrayList.remove(santaIndex);
                 receiverArrayList.remove(receiverIndex);
-
-                //send email with the name of the chosen receiver to santa
-                intent.putExtra(Intent.EXTRA_TEXT, chosenReceiver.getFirstName() + ", " + chosenReceiver.getLastName());
-                if (intent != null) {
-                    startActivity(intent);//null pointer check in case package name was not found
-                }
-
-
             }
-            Log.d("startAssignment", "assignment done successfully");
 
+            showPairList();
 
             Toast.makeText(getApplicationContext(), R.string.assignmentDoneToast, Toast.LENGTH_LONG).show();
         }else{
@@ -137,11 +109,75 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * Debug information. Shows random assigned pair list.
+     */
+    private void showPairList(){
+        Log.d("pairList", pairList.toString());
+    }
+
+    /**
+     * Creates a random pair of "santa - receiver" and saves it into pairList.
+     * This aint persistent though.
+     */
+    private void defineRandomPairs(){
+        santaIndex = randomGen.nextInt(santaArrayList.size());
+        receiverIndex = randomGen.nextInt(receiverArrayList.size());
+        chosenSanta = santaArrayList.get(santaIndex);
+        chosenReceiver = receiverArrayList.get(receiverIndex);
+        pairList.put(chosenSanta.getEmail(), chosenReceiver.getEmail());
+        Log.d("randomPair", "random pair: " + pairList.toString());
+    }
+
+    /**
+     * Create a list for gift receivers. This is in fact a second santaList, because every santa
+     * also is a receiver
+     */
+    private void createReceiverList(){
+        //create and fill a receiver list with all santas, because every santa is also a receiver
+        receiverArrayList = new ArrayList<Santa>();
+        for (Santa temp : santaArrayList) {
+            receiverArrayList.add(temp);
+        }
+    }
+
+    /**
+     * sends email notification to a santa, containing information about his gift receiver.
+     * @param santaIndex
+     * @param chosenReceiver
+     */
+    private void sendMailWithIntent(int santaIndex, Santa chosenReceiver){
+        //TODO: delete this method after implementing the noreply@noobits.de mailservice.
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto: " + santaArrayList.get(santaIndex).getEmail()));
+        intent.putExtra(Intent.EXTRA_SUBJECT, "your secret santa gift receiver");
+
+        //send email with the name of the chosen receiver to santa
+        intent.putExtra(Intent.EXTRA_TEXT, chosenReceiver.getFirstName() + ", " + chosenReceiver.getLastName());
+        if (intent != null) {
+            startActivity(intent);//null pointer check in case package name was not found
+        }
+    }
+
+    /**
+     * checks the pair for equivalency and mutual order.
+     * @return true if santa and receiver are the same or already in pairList, but in mutual order
+     */
+    private boolean checkIfPairIsInvalid(){
+
+        if (chosenSanta.equals(chosenReceiver)
+                || (pairList.containsKey(chosenReceiver.getEmail())
+                && pairList.get(chosenReceiver.getEmail()).equals(chosenSanta.getEmail()))) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Loads the saved list from sharedpreferences.
      */
     private void loadSavedSantas(){
-        //TODO: open sharedpreferences and get the list from there to save it in this class's list
         String santaListJson = myPrefs.getString("santaList", "");
         santaArrayList = gson.fromJson(santaListJson, new TypeToken<List<Santa>>(){}.getType());
     }
@@ -159,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("updateSantaListView", "loop nr.:" + i);
                 listViewContent[i] = santaArrayList.get(i).getFirstName() + " " + santaArrayList.get(i).getLastName();
             }
-            //TODO: fill listView with items containing santa attributes forename and name
 
             adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, android.R.id.text1, listViewContent);
             listView.setAdapter(adapter);
@@ -176,6 +211,30 @@ public class MainActivity extends AppCompatActivity {
         MainActivity.this.startActivity(intent);
     }
 
+    /**
+     * Adds onClickListeners to buttons and listitems.
+     */
+    public void addOnClickListeners(){
+        shuffleButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                SharedPreferences.Editor editor = myPrefs.edit();
+                editor.remove("santaList");
+                editor.apply();
+                loadSavedSantas();
+                updateSantaListView();
+                return false;
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //TODO: create and open a contextmenu to edit/delete items
+                return false;
+            }
+        });
+    }
 
 
 }

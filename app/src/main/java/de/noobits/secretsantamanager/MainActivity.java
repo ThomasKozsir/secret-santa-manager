@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    private final String SMTPSERVER = "smtp.1blu.de";
+    private final String NOREPLY = "noreply@noobits.de";
+    private final int SMTPPORT = 587;
+    private final String password = "Q64j_4=lZ.e%;)@";
     private FloatingActionButton addButton, shuffleButton;
     private ArrayList<Santa> santaArrayList ;    //set of all santas who need a receiver (all members at the beginning)
     private ArrayList<Santa> receiverArrayList; //set of people who have no santa yet
@@ -30,15 +34,16 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private ListView listView;
     private String[] listViewContent;
+    private String mailText;
     private SharedPreferences myPrefs;
     private Gson gson;
     private Random randomGen;
-    int santaIndex;
-    int receiverIndex;
-    Santa chosenSanta;
-    Santa chosenReceiver;
+    private int santaIndex;
+    private int receiverIndex;
+    private Santa chosenSanta;
+    private Santa chosenReceiver;
     //santas are keys while receivers are values
-    HashMap<String, String> pairList;
+    private HashMap<String, String> pairList;
 
 
     @Override
@@ -75,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Chooses a random Santa out of the set and assign him to another member.
      */
-    public void startAssignment(View v){
+    public void startAssignment(View v) throws Exception{
         loadSavedSantas();
         //only do anything if there are at least 3 people in the list
         if(!(santaArrayList == null) && santaArrayList.size() > 2) {
@@ -89,12 +94,12 @@ public class MainActivity extends AppCompatActivity {
                 defineRandomPairs();
 
                 while(checkIfPairIsInvalid()){
-                    Log.d("loop", "in check loop");
                     pairList.remove(chosenSanta.getEmail());
                     defineRandomPairs();
                 }
 
-                EmailController.sendEmails(chosenSanta, chosenReceiver);
+                mailText = chosenReceiver.getFirstName() + chosenReceiver.getLastName() + " (" + chosenReceiver.getEmail() + ")";
+                new EmailController(SMTPSERVER, SMTPPORT, NOREPLY, chosenSanta.getEmail(), password).sendEmail(getResources().getString(R.string.emailAssignmentSubject), mailText);
 
                 //remove santa from santaList and receiver from receiverList
                 santaArrayList.remove(santaIndex);
@@ -127,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
         chosenSanta = santaArrayList.get(santaIndex);
         chosenReceiver = receiverArrayList.get(receiverIndex);
         pairList.put(chosenSanta.getEmail(), chosenReceiver.getEmail());
-        Log.d("randomPair", "random pair: " + pairList.toString());
     }
 
     /**
@@ -145,9 +149,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * sends email notification to a santa, containing information about his gift receiver.
      * @param santaIndex
-     * @param chosenReceiver
      */
-    private void sendMailWithIntent(int santaIndex, Santa chosenReceiver){
+    private void sendMailWithIntent(int santaIndex){
         //TODO: delete this method after implementing the noreply@noobits.de mailservice.
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto: " + santaArrayList.get(santaIndex).getEmail()));
@@ -161,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * checks the pair for equivalency and mutual order.
+     * checks the pair for equality and mutual order.
      * @return true if santa and receiver are the same or already in pairList, but in mutual order
      */
     private boolean checkIfPairIsInvalid(){
@@ -192,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
             listViewContent = new String[santaCounter];
 
             for (int i = 0; i < santaCounter; i++) {
-                Log.d("updateSantaListView", "loop nr.:" + i);
                 listViewContent[i] = santaArrayList.get(i).getFirstName() + " " + santaArrayList.get(i).getLastName();
             }
 
